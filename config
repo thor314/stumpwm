@@ -1,0 +1,69 @@
+;; -*- mode: Lisp; eval: (stumpwm-mode 1); -*-
+;;
+;; lisp's stumpwm config file
+;; Created December 14, 2021
+
+;; noob says "which-key-mode pls"
+(which-key-mode)
+;; set cursor to left-facing pointer
+(run-shell-command "xsetroot -cursor_name left_ptr")
+;; click switches window focus
+(setf *mouse-focus-policy* :click)
+;; set up a basic modeline
+(setf *window-format* "%m%n%s%c")
+(setf *screen-mode-line-format* (list "[^B%n^b] %W^>%d"))
+(setf *time-modeline-string* "%a %b %e %k:%M")
+(set-font "--ABAT-Cantarell-bold-normal-normal-*-16-*-*-*-*-0-iso10646-1")
+(enable-mode-line (current-screen) (current-head) t)
+
+(set-prefix-key (kbd "s-SPC"))
+(setf *message-window-gravity* :top-right)
+
+(defcommand logout () ()
+  (run-shell-command "pkill -KILL -u $USERNAME"))
+(define-key *root-map* (kbd "s-q") "logout")
+;;Create an empty keymap. To hang frame related bindings off C-t C-f one might use:
+(defvar *launcher*
+  (let ((m (make-sparse-keymap)))
+    (define-key m (kbd "s-c") "exec chromium")
+    (define-key m (kbd "s-d") "exec discord")
+    (define-key m (kbd "s-e") "emacs")
+    (define-key m (kbd "s-f") "exec firefox")
+    (define-key m (kbd "s-g") "exec gimp")
+    (define-key m (kbd "s-s") "exec signal-desktop")
+    (define-key m (kbd "s-S") "exec station-electron")
+    (define-key m (kbd "s-t") "exec telegram-desktop")
+    (define-key m (kbd "s-T") "exec gnome-terminal")
+    m
+  ))
+(define-key *root-map* (kbd "s-a") '*launcher*)
+(define-key *root-map* (kbd "s-k") '(run-shell-command "setxkbmap dvorak -option ctrl:swapcaps"))
+
+(defun startup-apps ()
+  (run-shell-command "emacs")
+  (select-window-by-number 1)
+  (run-shell-command "exec firefox")
+  )
+(startup-apps)
+
+;; Questions:
+;; 1. How do I reload my config? I can <prefix> : <cmd>, to test, but that's lame
+;; -> log out/in
+;; 2. How do I paste into the <prefix> : ?
+;; -> use the stumpish is a stumpwm repl
+;; 3. How do I select my other monitor without the mouse? (and then pull blah window to the other frame)
+;; and then, how do I tell stump to launch emacs and firefox on those windows at startup
+
+;; TODO
+;; 1. modeline: battery, wifi, time
+;; 2. background
+;; 3. desktop and battery notifications
+;; 4. close lid should turn off keyboard lights
+;; <pre> ; commands - lists commands. Example command:
+;;
+;; ;;; the diff between defcommand and defun is that defcommand is interactive
+;; (defcommand fn_name (name age)
+;; ;; commands must have a type. https://stumpwm.github.io/1.0.0/stumpwm-1.0.0_3.html#StumpWM-Types
+;;     ((:string "Enter your name: ")
+;;      (:number "Enter your age: "))
+;;   (message "~a, in six years you will be ~a" name (+ 6 age)))
